@@ -23,6 +23,7 @@ function createConnection()
 {
   console.log("called: createConnection.");
 
+  // configには必要であればSTUNサーバーのURLなどを指定する
   let pc_config = {"iceServers":[]};
   pc = new RTCPeerConnection(pc_config);
 
@@ -51,14 +52,6 @@ function createConnection()
       dom.sdp.send.value = pc.localDescription.sdp;
     }
   }
-
-  // var channel = pc.createDataChannel("chat");
-  // channel.onopen = function(event) {
-  //   channel.send('Hi you!');
-  // }
-  // channel.onmessage = function(event) {
-  //   console.log(event.data);
-  // }
 
   peerConnection = pc;
 }
