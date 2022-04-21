@@ -1,8 +1,11 @@
 # ブラウザ間でP2P通信の確立
 
-## この動画でやることの動作確認
+異なるブラウザでカメラの映像をやり取りする。
+
+## 動作確認
 
 - 資料置き場：https://github.com/kurodakazumichi/youtube/tree/main/IntruductionToWebRTC/02
+- カメラが必要
 - index.html
 - main.js
 - サーバーを立てる
