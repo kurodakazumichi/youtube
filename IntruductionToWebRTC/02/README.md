@@ -1,7 +1,11 @@
 # ブラウザ間でP2P通信の確立
 
-資料置き場：https://github.com/kurodakazumichi/youtube/tree/main/IntruductionToWebRTC/02
+## この動画でやることの動作確認
 
+- 資料置き場：https://github.com/kurodakazumichi/youtube/tree/main/IntruductionToWebRTC/02
+- index.html
+- main.js
+- サーバーを立てる
 
 
 ## 学んだこと
