@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="js">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>シンプルチャット</title>
+</head>
+<body>
+  <ul id="messages"></ul>
+  <input id="message" size="50"><button onclick="sendMessage()">送信</button>
+  <script>
+    const dom = {
+      messages: document.getElementById("messages"),
+      message : document.getElementById("message")
+    }
+
+    const wsUrl = 'ws://localhost:3000';
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = (e) => {
+      console.log('ws open()');
+    }
+
+    ws.onerror = (e) => {
+      console.error('ws onerror() ERR:', err);
+    }
+
+    ws.onmessage = async (e) => {
+      const msg = await e.data.text();
+      addMessage(msg);
+    }
+
+    function sendMessage() 
+    {
+      const msg = dom.message.value;
+      dom.message.value = "";
+      dom.message.focus();
+
+      if (msg) {
+        addMessage(msg);
+        ws.send(msg);
+      }  
+    }
+
+    function addMessage(msg) {
+      const item = document.createElement("li");
+      item.innerText = msg;
+      dom.messages.appendChild(item); 
+    }
+
+  </script>
+</body>
+</html>
