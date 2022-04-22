@@ -152,7 +152,8 @@ WebSocketを使うことで、クライアントからサーバーに対して�
 
 ### WebSocketを使うために
 
-- `WebSocket`は`http`や`https`ではなくた、`ws`や`wss`というプロトコルを使い、WebSocketに対応したサーバーが必要である。
+- WebSocketに対応したサーバーが必要である。
+
 - Node.jsを使えばすぐ作れる
 
 
@@ -167,18 +168,15 @@ WebSocketを使うことで、クライアントからサーバーに対して�
 
 ## WebSocketServerの実装
 
-### 環境準備
+### 環境
 
 - Node.js
-- nodemon
-- wscat
+- 便利なので使うパッケージ、`nodemon`、`wscat`
 
 ```
 yarn global add nodemon
 yarn global add wscat
 ```
-
-`nodemon`は`js`が変更されたら自動的に実行しなおしてくれる便利ツールで、`wscat`はコマンドラインからWebSocketServerにリクエストを出せる便利コマンド(テストしやすくなる)
 
 
 
@@ -271,7 +269,9 @@ wsServer.on('connection', (me) =>
 
 
 
-クライアントが増えた場合、メッセージを送った本人にしかメッセージは返ってこない状態
+#### クライアントが増えた場合
+
+メッセージを送った本人にしかメッセージは返ってこない状態
 
 ```mermaid
 sequenceDiagram
@@ -281,15 +281,13 @@ sequenceDiagram
 	
 	Server->>Server: 起動
 	Client1->>Server: 接続
+	Client2->>Server:接続
+	
 	Client1->>+Server: メッセージを送る
 	Server->>-Client1: メッセージを返す
 	
-	Client2->>Server:接続
 	Client2->>+Server: メッセージを送る
 	Server->>-Client2: メッセージを返す
-	
-	Client1->>+Server: メッセージを送る
-	Server->>-Client1: メッセージを返す
 ```
 
 
