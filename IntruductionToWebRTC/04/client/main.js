@@ -1,6 +1,7 @@
 //-----------------------------------------------------------------------------
-// 使うグローバル変数
+// グローバル変数
 //-----------------------------------------------------------------------------
+const WSS_URL      = "wss://localhost:3000"; // WebSocketServerのURL
 let server         = null;
 let peerConnection = null;
 
@@ -30,6 +31,36 @@ function connect() {
 }
 
 //-----------------------------------------------------------------------------
+// WebSocket系
+function prepareWebSocket() 
+{
+  server = new WebSocket(WSS_URL);
+  server.onopen = onOpen;
+  server.onerror = onError;
+  server.onmessage = onMessage;
+}
+
+function onOpen(e) {
+  console.log("open web socket server.");
+}
+
+function onError(e) {
+  console.error(e);
+}
+
+async function onMessage(e) 
+{
+  const text = await e.data.text();
+  const description = JSON.parse(text);
+
+  receiveSessionDescription(description);
+
+  if (description.type === 'offer') {
+    await createAnswer();
+  }
+}
+
+//-----------------------------------------------------------------------------
 // PeerConnection系
 
 // RTCPeerConnectionの準備
@@ -56,7 +87,9 @@ async function createAnswer()
   await peerConnection.setLocalDescription(sessionDescription);
 }
 
-function sendSessionDescription(description) {
+function sendSessionDescription(description) 
+{
+  // JSONを文字列にして送信
   const data = JSON.stringify(description);
   server.send(data);
 
@@ -74,7 +107,6 @@ async function receiveSessionDescription(description)
 }
 
 function onTrack(e) {
-  console.log("called: ontrack");
   let stream = e.streams[0];
   playVideo(dom.videos.remote, stream);
 }
@@ -87,36 +119,6 @@ function onIceCandidateVanilla (e)
   // SDPの情報をシグナリングサーバーへ
   const description = peerConnection.localDescription;
   sendSessionDescription(description);
-}
-
-//-----------------------------------------------------------------------------
-// WebSocket系
-function prepareWebSocket() 
-{
-  server = new WebSocket("wss://192.168.1.5:3000");
-  server.onopen = onOpen;
-  server.onerror = onError;
-  server.onmessage = onMessage;
-}
-
-function onOpen(e) {
-  console.log("open web socket server.");
-}
-
-function onError(e) {
-  console.error(e);
-}
-
-async function onMessage(e) 
-{
-  const text = await e.data.text();
-  const description = JSON.parse(text);
-
-  receiveSessionDescription(description);
-
-  if (description.type === 'offer') {
-    await createAnswer();
-  }
 }
 
 //-----------------------------------------------------------------------------
