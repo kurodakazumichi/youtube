@@ -250,12 +250,17 @@ function onError(e) {
 async function onMessage(e) 
 {
   const text = await e.data.text();
-  const description = JSON.parse(text);
+  const msg = JSON.parse(text);
 
-  receiveSessionDescription(description);
-
-  if (description.type === 'offer') {
+  if (msg.type === 'offer') {
+    receiveSessionDescription(msg);
     await createAnswer();
+    return;
+  }
+
+  if (msg.type === 'answer') {
+    receiveSessionDescription(msg);
+    return;
   }
 }
 
@@ -269,7 +274,7 @@ function prepareRTCPeerConnection()
   peerConnection = new RTCPeerConnection(config);
 
   peerConnection.ontrack        = onTrack;
-  peerConnection.onicecandidate = onIceCandidateVanilla;
+  peerConnection.onicecandidate = onIceCandidate;
 }
 
 // OfferのSessionDescriptionを作成・セット
@@ -310,8 +315,10 @@ function onTrack(e) {
   playVideo(dom.videos.remote, stream);
 }
 
-function onIceCandidateVanilla (e) 
+function onIceCandidate (e) 
 {
+  console.log("onicecandidate");
+  
   // ICEの収集完了を待つ
   if (e.candidate !== null) return;
 
@@ -455,7 +462,146 @@ WebSocketServerのURLを`ws`から`wss`に変更するのみ
 
 
 
-### 課題
+## ICE Trickleにしてみる
+
+上記の実装はICE Candidateが集まるのを待って通信をするので`ICE Vanilla`である、この実装を`ICE Candidate`が見つかるたびに交換しあう、`ICE Trickle`に変更してみる。
+
+
+
+```mermaid
+sequenceDiagram
+	autonumber
+	participant A as Aさん
+	participant ClientA as Aさんのブラウザ
+	participant Server as Signaling Server
+	participant ClientB as Bさんのブラウザ
+	participant B as Bさん
+	
+	A->>ClientA: Connectボタンを押す
+	opt connect
+        ClientA->>ClientA: SDPを作成:createOffer()
+        ClientA->>Server: SDPを送信
+        Server->>+ClientB: 
+        
+        ClientB->>-ClientB: SDPを受信:onMessage()が動く
+        
+        ClientB->>ClientB: SDPを作成:createAnswer()
+        ClientB->>Server: SDPを送信
+        Server->>+ClientA: 
+        
+        ClientA->>-ClientA: SDPを受信:onMessage()が動く
+        
+        ClientA->>Server: ICE Candidateを送信
+        Server->>ClientB: 
+        
+        ClientB->>Server: ICE Candidateを送信
+        Server->>ClientA: 
+        
+        
+	end
+	
+	
+	Note over ClientA,ClientB: P2P接続完了
+```
+
+
+
+
+
+### 変更点１
+
+最初にSDPの情報を作った時点で相手に送信するようにする。
+
+```diff
+// OfferのSessionDescriptionを作成・セット
+async function createOffer() 
+{
+  const sessionDescription = await peerConnection.createOffer();
+  await peerConnection.setLocalDescription(sessionDescription);
++  sendSessionDescription(sessionDescription);
+}
+
+// AnswerのSessionDescriptionを作成・セット
+async function createAnswer() 
+{
+  const sessionDescription = await peerConnection.createAnswer();
+  await peerConnection.setLocalDescription(sessionDescription);
++  sendSessionDescription(sessionDescription);
+}
+```
+
+
+
+### 変更点2
+
+`onIceCandidate(e)`の処理を変更する
+
+**変更前**
+
+```js
+function onIceCandidate (e) 
+{
+  // ICEの収集完了を待つ
+  if (e.candidate !== null) return;
+
+  // SDPの情報をシグナリングサーバーへ
+  const description = peerConnection.localDescription;
+  sendSessionDescription(description);
+}
+```
+
+**変更後**
+
+```js
+function onIceCandidate (e) 
+{
+  // candidateがなければ何もしない
+  if (e.candidate === null) return;
+
+  // 候補を送信
+  const data = {
+    type: "candidate",
+    ice: e.candidate
+  };
+  server.send(JSON.stringify(data));
+}
+```
+
+
+
+### 変更点3
+
+WebSocketServerから`candidate`が届いたら、それをコネクションに登録する。
+
+```diff
+async function onMessage(e) 
+{
+  const text = await e.data.text();
+  const msg = JSON.parse(text);
+
+  if (msg.type === 'offer') {
+    receiveSessionDescription(msg);
+    await createAnswer();
+    return;
+  }
+
+  if (msg.type === 'answer') {
+    receiveSessionDescription(msg);
+    return;
+  }
+
++  if (msg.type === 'candidate') {
++    const candidate = new RTCIceCandidate(msg.ice);
++    peerConnection.addIceCandidate(candidate);
++  }
+}
+```
+
+
+
+
+
+## 課題
 
 今回の実装では1:1の通信しか実現できず、複数人で集まったりはできないということ。
 
