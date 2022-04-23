@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>クライアント</title>
+</head>
+<body>
+  <div>
+    <video id="local_video" autoplay style="width: 640px;"></video>
+    <video id="remote_video" autoplay style="width: 640px;"></video>
+  </div>
+  <div>
+    <textarea id="text_for_send_sdp" rows="5", cols="43"></textarea>
+    <textarea id="text_for_recv_sdp" rows="5", cols="43"></textarea>
+  </div>
+  <div>
+    <button onclick="prepare()">Prepare</button>
+    <button onclick="connect()">Connect</button>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
