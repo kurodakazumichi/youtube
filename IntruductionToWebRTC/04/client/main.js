@@ -51,12 +51,22 @@ function onError(e) {
 async function onMessage(e) 
 {
   const text = await e.data.text();
-  const description = JSON.parse(text);
+  const msg = JSON.parse(text);
 
-  receiveSessionDescription(description);
-
-  if (description.type === 'offer') {
+  if (msg.type === 'offer') {
+    receiveSessionDescription(msg);
     await createAnswer();
+    return;
+  }
+
+  if (msg.type === 'answer') {
+    receiveSessionDescription(msg);
+    return;
+  }
+
+  if (msg.type === 'candidate') {
+    const candidate = new RTCIceCandidate(msg.ice);
+    peerConnection.addIceCandidate(candidate);
   }
 }
 
@@ -70,7 +80,7 @@ function prepareRTCPeerConnection()
   peerConnection = new RTCPeerConnection(config);
 
   peerConnection.ontrack        = onTrack;
-  peerConnection.onicecandidate = onIceCandidateVanilla;
+  peerConnection.onicecandidate = onIceCandidate;
 }
 
 // OfferのSessionDescriptionを作成・セット
@@ -78,6 +88,7 @@ async function createOffer()
 {
   const sessionDescription = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(sessionDescription);
+  sendSessionDescription(sessionDescription);
 }
 
 // AnswerのSessionDescriptionを作成・セット
@@ -85,6 +96,7 @@ async function createAnswer()
 {
   const sessionDescription = await peerConnection.createAnswer();
   await peerConnection.setLocalDescription(sessionDescription);
+  sendSessionDescription(sessionDescription);
 }
 
 function sendSessionDescription(description) 
@@ -111,14 +123,17 @@ function onTrack(e) {
   playVideo(dom.videos.remote, stream);
 }
 
-function onIceCandidateVanilla (e) 
+function onIceCandidate (e) 
 {
-  // ICEの収集完了を待つ
-  if (e.candidate !== null) return;
+  console.log("onicecandidate");
 
-  // SDPの情報をシグナリングサーバーへ
-  const description = peerConnection.localDescription;
-  sendSessionDescription(description);
+  if (e.candidate === null) return;
+
+  const data = {
+    type: 'candidate',
+    ice : e.candidate,
+  }
+  server.send(JSON.stringify(data));
 }
 
 //-----------------------------------------------------------------------------
