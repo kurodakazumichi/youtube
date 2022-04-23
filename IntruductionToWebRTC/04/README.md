@@ -1,4 +1,4 @@
-# シグナリングサーバーで繋げる
+# シグナリングサーバーを用意する
 
 資料👉https://github.com/kurodakazumichi/youtube/tree/main/IntruductionToWebRTC/04
 
@@ -14,11 +14,14 @@
 
 
 
+## 動画の流れ
+
 - 通信が繋がるまでの大まかな流れ
 - 通信が繋がるまでの細かめの流れ
 - シグナリングサーバーの実装
 - クライアントサイドの実装
 - シグナリングサーバーのssl対応
+- ICE Trickle版に修正
 
 
 
@@ -167,7 +170,7 @@ cd client
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -357,6 +360,8 @@ function playVideo(element, stream)
 ```
 http-server -c-1 ./client --ssl --key ./ssl/server.key --cert ./ssl/server.crt
 ```
+
+※サーバー証明書を持ってきておく
 
 
 
