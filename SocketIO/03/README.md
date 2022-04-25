@@ -175,7 +175,7 @@ const reader = require('readline').createInterface({
 });
 
 // 文字が入力されたときの処理
-read.on("line", (input) => {
+reader.on("line", (input) => {
   console.log(input);
 })
 ```
