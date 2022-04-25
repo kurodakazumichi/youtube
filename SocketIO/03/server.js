@@ -1,4 +1,8 @@
 const { Server } = require('socket.io');
+const io = new Server(3000);
+// CORS対策を有効にする場合は↑をコメントアウトして、↓のコメントアウトを外してください
+/**** CORS対策用のコード ****
+const { Server } = require('socket.io');
 const { createServer } = require('http');
 
 const httpServer = createServer();
@@ -7,6 +11,7 @@ const io = new Server(httpServer, {
     origin: "http://localhost:8080"
   }
 });
+*****ここまで****/
 
 httpServer.listen(3000);
 console.log("サーバーが起動しました");
