@@ -10,4 +10,4 @@
 - [エンディアン、メモリフォーマット、データタイプ、例外/割り込み](https://www.aps-web.jp/academy/cm/262/)
 - [メモリの概念を理解する](https://www.cqpub.co.jp/interface/sample/200602/if0602_chap1.pdf)
 - [CPU発達史](http://www.ffortune.net/comp/history/cpu-motorola.htm)
-- [ガリバー旅行記に由来する「有名なコンピュータ用語」とは!?](
+- [ガリバー旅行記に由来する「有名なコンピュータ用語」とは!?](http://hirabayashi.wondernotes.jp/2012/08/26/ガリバー旅行記に由来する「有名なコンピュータ/)
